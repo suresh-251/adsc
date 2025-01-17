@@ -13,7 +13,8 @@
 		<style>
 			body {background-color:#000000;}
 			.container-fluid {padding:50px;}
-			.container{background-color:white;padding:50px;   }
+			.container{background-color:transparent;padding:50px; 
+			  }
 			#title{font-family: 'Fredoka One', cursive;
 }
 			.text-uppercase{
@@ -26,12 +27,56 @@
     width: 1104px;
     height: 442px;
     overflow: scroll;
-    background-color:;
+    background-color:transparent;
 }
 		.style1 {
 	color: #000000;
 	font-weight: bold;
 }
+.table {
+	background: rgba(255, 255, 255, 0.2); /* Glass effect */
+            backdrop-filter: blur(15px); /* Blur the background */
+	background-color: transparent		;
+    border-radius: 1.5rem; /* Adds rounded corners to the entire table */
+    overflow: hidden; /* Ensures the content does not overflow the rounded corners */
+    border-collapse: separate; /* Ensures the rounded corners are visible */
+    width: 100%; /* Make table take full width */
+}
+
+.header-cell1{
+    background-color: #FF0000; /* Red background for the header */
+    color: white; /* White text for header */
+    font-family: 'monospace', sans-serif; /* Matching the font style */
+    font-size: 20px;
+    text-align: center;
+    border-top-left-radius: 1.5rem; /* Rounded top corners */
+}
+.header-cell2{
+    background-color: #FF0000; /* Red background for the header */
+    color: white; /* White text for header */
+    font-family: 'monospace', sans-serif; /* Matching the font style */
+    font-size: 20px;
+    text-align: center;
+    border-top-right-radius: 1.5rem; /* Rounded top corners */
+}
+
+.data-cell {
+    background-color: transparent; /* White background for data cells */
+    color: rgb(105, 24, 24); /* Red text for data */
+    font-size: 20px;
+    text-align: center;
+    font-family: 'fantasy', sans-serif; /* Matching the font style */
+}
+
+.data-cell span {
+    font-family: monospace; /* Specific font style for ratio */
+    font-size: 19px;
+}
+
+.table td {
+    padding: 15px; /* Add padding for better spacing */
+}
+
 .style7 {color: #FFFF00}
         </style>
 
@@ -49,18 +94,19 @@
                             <p align="center" class="text-uppercase pull-center style1">View Sensitive Information Prediction Type Ratio Details</p>
                             <hr>
                             <div>
-                               <table border="5" align="center" bordercolor="#FF00FF">
-                      <tr><td bgcolor="#FF0000"><div align="center"><span class="style10 style7">Sensitive Information Prediction Type</span></div></td>
-                          <td bgcolor="#FF0000"><div align="center"><span class="style10 style7">Ratio</span></div></td>
-                      </tr>
-                            {% for object in objs %}
-                      <tr>
-                                        <td bgcolor="#FFFFFF" style="color:red; font-size:20px; font-family:fantasy" ><div align="center">{{object.names}}</div></td>
-                                        <td bgcolor="#FF0000" style="font-family:monospace; font-size:19px; "><div align="center" class="style9"><span class="style7">{{object.ratio}}</span></div></td>
-                                 </tr>
-
-                                        {% endfor %}
-                      </table>
+								<table class="table" border="5" align="center" bordercolor="#FF00FF">
+									<tr>
+										<td class="header-cell1"><div align="center"><span class="style10 style7">Sensitive Information Prediction Type</span></div></td>
+										<td class="header-cell2"><div align="center"><span class="style10 style7">Ratio</span></div></td>
+									</tr>
+									{% for object in objs %}
+									<tr>
+										<td class="data-cell"><div align="center">{{object.names}}</div></td>
+										<td class="data-cell"><div align="center"><span >{{object.ratio}}</span></div></td>
+									</tr>
+									{% endfor %}
+								</table>
+								
 
 
 

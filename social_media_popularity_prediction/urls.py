@@ -35,6 +35,11 @@ urlpatterns = [
     path('likeschart/<str:like_chart>/', serviceprovider.likeschart, name="likeschart"),
     path('View_Predicted_Social_Media_Popularity_Ratio/', serviceprovider.View_Predicted_Social_Media_Popularity_Ratio, name="View_Predicted_Social_Media_Popularity_Ratio"),
     path('train_model/', serviceprovider.train_model, name="train_model"),
+    path('update_profile/', remoteuser.update_profile, name='update_profile'),
     path('View_Predicted_Social_Media_Popularity/', serviceprovider.View_Predicted_Social_Media_Popularity, name="View_Predicted_Social_Media_Popularity"),
     path('Download_Predicted_DataSets/', serviceprovider.Download_Predicted_DataSets, name="Download_Predicted_DataSets"),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

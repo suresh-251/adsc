@@ -1,6 +1,8 @@
 from django.db.models import Count
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+import os
+from social_media_popularity_prediction import settings
 
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
@@ -35,6 +37,24 @@ def Add_DataSet_Details(request):
 
     return render(request, 'RUser/Add_DataSet_Details.html', {"excel_data": ''})
 
+def update_profile(request):
+    if request.method == 'POST':
+        # Update the user profile here
+        user = request.user
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        user.phoneno = request.POST.get('phoneno')
+        user.gender = request.POST.get('gender')
+        user.address = request.POST.get('address')
+        user.country = request.POST.get('country')
+        user.state = request.POST.get('state')
+        user.city = request.POST.get('city')
+        user.save()  # Save the updated details in the database
+
+        return redirect('profile')  # Redirect to the profile page or appropriate URL
+
+    return render(request, 'userprofile.html')
+
 
 def Register1(request):
 
@@ -62,157 +82,136 @@ def ViewYourProfile(request):
     return render(request,'RUser/ViewYourProfile.html',{'object':obj})
 
 
+from textblob import TextBlob
+from django.shortcuts import render, redirect
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn import svm
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score
+import numpy as np
+import random
+import os
+from django.conf import settings
+from Remote_User.models import ClientRegister_Model
+
+# Initialize model tracking with CCMB bandit parameters
+model_rewards = {'naive_bayes': [], 'svm': [], 'logistic': [], 'decision_tree': [], 'neural_network': []}
+model_confidences = {'naive_bayes': 1.0, 'svm': 1.0, 'logistic': 1.0, 'decision_tree': 1.0, 'neural_network': 1.0}
+
+def select_model_with_ccmb():
+    """Select the best model based on cumulative confidence multi-armed bandit approach."""
+    scores = {}
+    for model in model_rewards:
+        if model_rewards[model]:
+            mean_reward = np.mean(model_rewards[model])
+            confidence = model_confidences[model]
+            scores[model] = mean_reward + confidence * np.sqrt(1 / (len(model_rewards[model]) + 1))
+        else:
+            scores[model] = random.uniform(0, 1)  # Prioritize exploration for new models
+    return max(scores, key=scores.get)
+
+def control_diffusion(sensitivity):
+    """Control diffusion based on content sensitivity."""
+    if sensitivity == 1:  # Sensitive content
+        return random.uniform(0.1, 0.3)  # Low diffusion probability
+    else:  # Non-sensitive content
+        return random.uniform(0.7, 0.9)  # Higher diffusion probability
+
+def update_model_rewards(model, reward):
+    """Update the rewards for the selected model."""
+    model_rewards[model].append(reward)
+    model_confidences[model] *= 0.95  # Decay confidence slightly
+
 def Predict_Social_Media_Popularity(request):
+    train_df = pd.read_csv('Datasets1.csv')
+    train_df['results'] = train_df['score'].apply(lambda x: 1 if x > 100 else 0)
+
+    # Add sentiment analysis to the training data
+    train_df['sentiment'] = train_df['post_desc'].apply(lambda x: TextBlob(x).sentiment.polarity)
+
+    cv = CountVectorizer()
+    X_train = cv.fit_transform(train_df['post_desc'])
+    y_train = train_df['results']
+
+    models = {
+        'naive_bayes': MultinomialNB(),
+        'svm': svm.LinearSVC(),
+        'logistic': LogisticRegression(random_state=0, solver='lbfgs'),
+        'decision_tree': DecisionTreeClassifier(),
+        'neural_network': MLPClassifier()
+    }
+
     if request.method == "POST":
+        if 'file' in request.FILES:  # Bulk prediction
+            file = request.FILES['file']
+            df = pd.read_csv(file) if file.name.endswith('.csv') else pd.read_excel(file)
 
-        if request.method == "POST":
+            # Validate required columns
+            required_columns = ['post_desc', 'score']
+            if not all(col in df.columns for col in required_columns):
+                return render(request, 'RUser/Predict_Social_Media_Popularity.html', 
+                              {'error': 'Uploaded file must contain "post_desc" and "score" columns.'})
 
-            photo_id=request.POST.get('photo_id')
-            owner=request.POST.get('owner')
-            gender=request.POST.get('gender')
-            post_desc=request.POST.get('post_desc')
-            score=request.POST.get('score')
-            created_dt=request.POST.get('created_dt')
-            lat=request.POST.get('lat')
-            lon=request.POST.get('lon')
-            u_city=request.POST.get('u_city')
-            u_country=request.POST.get('u_country')
+            # Apply response logic and sentiment analysis
+            df['results'] = df['score'].apply(lambda x: 1 if x > 100 else 0)
+            df['sentiment'] = df['post_desc'].apply(lambda x: TextBlob(x).sentiment.polarity)
+            X_test = cv.transform(df['post_desc'])
+            y_test = df['results']
 
+            selected_model_name = select_model_with_ccmb()  # Select best model using bandit
+            selected_model = models[selected_model_name]
+            selected_model.fit(X_train, y_train)
+            predictions = selected_model.predict(X_test)
 
-        df = pd.read_csv('Datasets1.csv')
+            # Update the model's reward and confidence
+            reward = accuracy_score(y_test, predictions)
+            update_model_rewards(selected_model_name, reward)
 
-        def apply_response(score):
-            if (score <= 100):
-                return 0  # Low Popularity
-            elif (score <= 250000 and score >= 100):
-                return 1  # More Popularity
+            df['Predicted Popularity'] = ['Sensitive' if pred == 1 else 'Non-sensitive' for pred in predictions]
+            df['Diffusion_Probability'] = df['results'].apply(control_diffusion)
 
-        df['results'] = df['score'].apply(apply_response)
+            # Sentiment-based adjustment
+            df['Adjusted Sensitivity'] = df.apply(lambda row: 'Highly Sensitive' if row['sentiment'] < -0.5 and row['results'] == 1 else row['Predicted Popularity'], axis=1)
 
-        cv = CountVectorizer()
-        X = df['post_desc']
-        y = df['results']
+            # Save the output
+            output_file = os.path.join(settings.MEDIA_ROOT, 'Bulk_Predictions.csv')
+            df.to_csv(output_file, index=False)
+            file_url = f"{settings.MEDIA_URL}Bulk_Predictions.csv"
 
-        print("Post Desc")
-        print(X)
-        print("Results")
-        print(y)
+            return render(request, 'RUser/Predict_Social_Media_Popularity.html', 
+                          {'objs': 'Bulk predictions complete.', 'file_url': file_url})
 
-        cv = CountVectorizer()
-        X = cv.fit_transform(X)
+        else:  # Single prediction
+            post_desc = request.POST.get('post_desc')
+            score = request.POST.get('score')
 
-        models = []
-        from sklearn.model_selection import train_test_split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
-        X_train.shape, X_test.shape, y_train.shape
+            if not post_desc or not score:
+                return render(request, 'RUser/Predict_Social_Media_Popularity.html', 
+                              {'error': 'Please provide both "post_desc" and "score".'})
 
-        print("Naive Bayes")
+            score = int(score)
+            sentiment = TextBlob(post_desc).sentiment.polarity
+            sensitivity = 1 if score > 100 else 0
+            context_vector = cv.transform([post_desc])
 
-        from sklearn.naive_bayes import MultinomialNB
+            selected_model_name = select_model_with_ccmb()
+            selected_model = models[selected_model_name]
+            selected_model.fit(X_train, y_train)
 
-        NB = MultinomialNB()
-        NB.fit(X_train, y_train)
-        predict_nb = NB.predict(X_test)
-        naivebayes = accuracy_score(y_test, predict_nb) * 100
-        print("ACCURACY")
-        print(naivebayes)
-        print("CLASSIFICATION REPORT")
-        print(classification_report(y_test, predict_nb))
-        print("CONFUSION MATRIX")
-        print(confusion_matrix(y_test, predict_nb))
-        models.append(('naive_bayes', NB))
+            prediction = selected_model.predict(context_vector)[0]
+            diffusion_probability = control_diffusion(sensitivity)
+            prediction_label = 'Sensitive' if prediction == 1 else 'Non-sensitive'
 
-        # SVM Model
-        print("SVM")
-        from sklearn import svm
+            # Sentiment-based adjustment for single prediction
+            if sentiment < -0.5 and prediction == 1:
+                prediction_label = 'Highly Sensitive'
 
-        lin_clf = svm.LinearSVC()
-        lin_clf.fit(X_train, y_train)
-        predict_svm = lin_clf.predict(X_test)
-        svm_acc = accuracy_score(y_test, predict_svm) * 100
-        print("ACCURACY")
-        print(svm_acc)
-        print("CLASSIFICATION REPORT")
-        print(classification_report(y_test, predict_svm))
-        print("CONFUSION MATRIX")
-        print(confusion_matrix(y_test, predict_svm))
-        models.append(('svm', lin_clf))
+            return render(request, 'RUser/Predict_Social_Media_Popularity.html', 
+                          {'objs': f'Prediction: {prediction_label}, Sentiment: {sentiment:.2f}, Diffusion Probability: {diffusion_probability:.2f}'})
 
-        print("Logistic Regression")
-
-        from sklearn.linear_model import LogisticRegression
-
-        reg = LogisticRegression(random_state=0, solver='lbfgs').fit(X_train, y_train)
-        y_pred = reg.predict(X_test)
-        print("ACCURACY")
-        print(accuracy_score(y_test, y_pred) * 100)
-        print("CLASSIFICATION REPORT")
-        print(classification_report(y_test, y_pred))
-        print("CONFUSION MATRIX")
-        print(confusion_matrix(y_test, y_pred))
-        models.append(('logistic', reg))
-
-        print("Decision Tree Classifier")
-        dtc = DecisionTreeClassifier()
-        dtc.fit(X_train, y_train)
-        dtcpredict = dtc.predict(X_test)
-        print("ACCURACY")
-        print(accuracy_score(y_test, dtcpredict) * 100)
-        print("CLASSIFICATION REPORT")
-        print(classification_report(y_test, dtcpredict))
-        print("CONFUSION MATRIX")
-        print(confusion_matrix(y_test, dtcpredict))
-        models.append(('DecisionTreeClassifier', dtc))
-
-        print("CNN")
-
-        from sklearn.neural_network import MLPClassifier
-        mlpc = MLPClassifier().fit(X_train, y_train)
-        y_pred = mlpc.predict(X_test)
-        print("ACCURACY")
-        print(accuracy_score(y_test, y_pred) * 100)
-        print("CLASSIFICATION REPORT")
-        print(classification_report(y_test, y_pred))
-        print("CONFUSION MATRIX")
-        print(confusion_matrix(y_test, y_pred))
-        models.append(('MLPClassifier', mlpc))
-
-        classifier = VotingClassifier(models)
-        classifier.fit(X_train, y_train)
-        y_pred = classifier.predict(X_test)
-
-        post_desc1 = [post_desc]
-        vector1 = cv.transform(post_desc1).toarray()
-        predict_text = classifier.predict(vector1)
-
-        pred = str(predict_text).replace("[", "")
-        pred1 = pred.replace("]", "")
-
-        prediction = int(pred1)
-
-        if (prediction == 0):
-            val = 'Non-sensitive'
-        elif (prediction == 1):
-            val = 'Sensitive'
-
-        print(val)
-        print(pred1)
-
-        detect_popularity_prediction.objects.create(
-        photo_id=photo_id,
-        owner=owner,
-        gender=gender,
-        post_desc=post_desc,
-        score=score,
-        created_dt=created_dt,
-        lat=lat,
-        lon=lon,
-        u_city=u_city,
-        u_country=u_country,
-        Prediction=val)
-
-        return render(request, 'RUser/Predict_Social_Media_Popularity.html',{'objs': val})
     return render(request, 'RUser/Predict_Social_Media_Popularity.html')
-
-
-

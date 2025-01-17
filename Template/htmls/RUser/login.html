@@ -1,130 +1,238 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% load static %}
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Login</title>
+    <title>Login</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'coin-slider.css' %}" />
 
-  <link rel="stylesheet"  type="text/css" href="{% static 'style.css'%} "  />
-<link rel="stylesheet"   type="text/css" href="{% static 'coin-slider.css'%}" />
+    <script type="text/javascript" src="{% static 'cufon-yui.js' %}"></script>
+    <script type="text/javascript" src="{% static 'cufon-aller.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery-1.4.2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'script.js' %}"></script>
+    <script type="text/javascript" src="{% static 'coin-slider.min.js' %}"></script>
 
-<script type="text/javascript" src="{% static 'cufon-yui.js'%} "></script>
-<script type="text/javascript" src="{% static 'cufon-aller.js'%}"></script>
-<script type="text/javascript" src="{% static 'jquery-1.4.2.min.js'%}"></script>
-<script type="text/javascript" src="{% static 'script.js'%}"></script>
-<script type="text/javascript" src="{% static 'coin-slider.min.js'%}"></script>
-<style type="text/css">
-<!--
-.style5 {
-	font-size: 24px;
-	color: #000000;
-}
-.style12 {font-weight: bold}
-.style13 {font-size: 24px; color: #FF0000; font-weight: bold; }
-.style16 {color: #FF0000}
-.style20 {color: #FF0000; font-weight: bold; }
--->
-</style>
+    <!-- Add FontAwesome for the eye icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            var passwordField = document.getElementById("password");
+            var icon = document.getElementById("toggle-icon");
+
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+
+    <!-- Custom Styles for the Page -->
+    <style>
+        /* General Body and Layout */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, rgba(245, 105, 204, 0.3), rgba(119, 44, 217, 0.3)); /* Lightened version of the gradient */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background: url("{% static 'bg.jpg' %}");
+	background-size:cover;
+        }
+
+        /* Main Box for Login */
+        .login-box {
+            background: transparent;
+            width: 400px;
+            padding: 40px;
+            border-radius: 3rem;
+            box-shadow: 0 15px 30px rgba(220, 138, 216, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Login Form Heading */
+        .login-box h2 {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #8700c4; /* Color changed for Adaptive */
+            margin-bottom: 20px;
+        }
+
+        /* Form Input Styles */
+        .form-group {
+            width: 100%;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #c28e8e;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #e7006e;
+            outline: none;
+        }
+
+        /* Eye Icon */
+        .eye-icon {
+            position: absolute;
+            top: 50%;
+            right: 10px; /* Adjusted to move icon to the right */
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #bbb; /* Lighter icon color */
+        }
+
+        /* Login Button */
+        .btn-login {
+            width: 100%;
+            background-color: #e7006e;
+            color: white;
+            padding: 15px;
+            border: none;
+            
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            margin:13px;
+            transition: 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background-color: #8700c4;
+        }
+
+        /* Register Link */
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .register-link a {
+            color: #8700c4;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* External Box for Header and Login */
+        .outer-container {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Profile Image with Shadow */
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Adding shadow */
+        }
+
+        /* Heading Box for the Page */
+        .page-heading-box {
+            background: transparent; /* Gradient from image */
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .page-heading {
+            font-size: 28px;
+            font-weight: bold;
+            color: linear-gradient(135deg, rgba(245, 105, 204, 0.8), rgba(119, 44, 217, 0.8));
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* White text color for the heading */
+            margin: 0;
+            
+        }
+
+        /* Remember me Checkbox above the Login Button */
+        .remember-me {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .remember-me input {
+            margin-right: 8px;
+        }
+    </style>
 </head>
+
 <body>
-<div class="main">
-  <div class="header">
-    <div class="header_resize">
-      <div class="menu_nav">
-        <p>&nbsp;</p>
-      </div>
-      <div class="mainbar">
-        <h1 align="center"><a href="index.html"><span class="content style5">Adaptive Diffusion of Sensitive Information In Online Social Networks</span></a></h1>
+    <div class="main">
+        <!-- External Container for Header and Login -->
+        <div class="outer-container">
+            <!-- Heading Box with the Heading Text -->
+            <div class="page-heading-box">
+                <div class="page-heading">
+                    Adaptive Diffusion of Sensitive Information <br> In Online Social Networks
+                </div>
+            </div>
 
-        <div class="tab-content tab-space">
-            <div class="tab-pane active" id="preview-alerts">
+            <!-- Login Form -->
+            <div class="login-box">
+                <h2>Login Using Your Account</h2>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" name="username" placeholder="username" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" id="password" placeholder="Password" required>
+                        <!-- Eye Icon for Password Visibility -->
+                        <i id="toggle-icon" class="fas fa-eye eye-icon" onclick="togglePassword()"></i>
+                    </div>
 
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-        <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script><link href="https://unpkg.com/soft-ui-design-system@1.0.1/assets/css/soft-design-system.min.css" rel="stylesheet" /><div class="container py-5">
-  <div class="row">
-    <div class="alert alert-primary text-white font-weight-bold" role="alert">
-     <p align="center"><span class="active"><span class="style12"><a href="{% url 'index' %}">Home|  </a><a href="{% url 'login' %}">Remote User </a>|<a href="{% url 'serviceproviderlogin' %}"> Service Provider </a></span></span></p>
-    </div>
-    <div>
-</div>
+                    <!-- Remember me Checkbox placed above the Login Button -->
+                    <div class="remember-me">
+                        <input type="checkbox" name="remember" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
 
-        <img src="{% static 'Banner.jpg'%}" width="1297" height="355" alt="" class="fl" />      </div>
-      <div class="clr"></div>
-      <div class="slider">
-        
-      </div>
-      <div class="clr"></div>
-    </div>
-  </div>
-  <div class="content">
-    <div class="content_resize">
-      <div class="mainbar">
-        <div class="article">
-          <h2 align="center" class="style13">Adaptive Diffusion of Sensitive Information In Online Social Networks</h2>
-          <div class="img">
-            <div align="center"><form method="POST" role="form">
-							{% csrf_token %}
+                    <button type="submit" name="submit1" class="btn-login">Login</button>
+                </form>
 
-						<fieldset>
-                             {% load static %}
-						<img src="{% static '/login.jpg' %}" alt="My image">
-							<p class="style5"> Login Using Your Account: </p>
-
-						<div class="form-group">
-								<input type="text" name="username"   placeholder="User Name" required>
-
-								<br />
-						      <br />
-						</div>
-						<div class="form-group">
-								<input type="password" name="password"   placeholder="Password" required>
-							</div>
-							<div>
-							  <p>
-								  <input type="submit" name="submit1"  class="btn btn-md" value="Login">
-								  <br />
-							    </p>
-							</div>
-							<div>
-
-							<button>
-							<span class="style16"><strong>Are You New User !!</strong></span><span class="style20">! </span><a href="{% url 'Register1' %}">REGISTER</a></button>
-                                
-							</div>
- 						</fieldset>
-				</form></div>
-          </div>
-
-            <div class="mainbar">
-
-
-        <div class="tab-content tab-space">
-            <div class="tab-pane active" id="preview-alerts">
-
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-        <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script><link href="https://unpkg.com/soft-ui-design-system@1.0.1/assets/css/soft-design-system.min.css" rel="stylesheet" /><div class="container py-5">
-  <div class="row">
-    <div class="alert alert-primary text-white font-weight-bold" role="alert">
-     <p align="center"><span class="active"><span class="style12"><a href="{% url 'login' %}">Home|  </a><a href="{% url 'login' %}">Remote User </a>|<a href="{% url 'serviceproviderlogin' %}"> Service Provider </a></span></span></p>
-    </div>
-    <div>
-</div>
-          <div class="post_content"></div>
-          <div class="clr"></div>
+                <!-- Register Link -->
+                <div class="register-link">
+                    <p>Are you a new user? <a href="{% url 'Register1' %}">Register here</a></p>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="sidebar">
-        <div class="searchform"></div>
-        <div class="clr"></div>
-      </div>
-      <div class="clr"></div>
     </div>
-  </div>
-  <div class="fbg"></div>
-  <div class="footer"></div>
-</div>
-<div align=center></div>
 </body>
 </html>

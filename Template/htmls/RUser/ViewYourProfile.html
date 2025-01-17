@@ -2,95 +2,203 @@
 {% block userblock %}
 
 <link rel="icon" href="images/icon.png" type="image/x-icon" />
-
-	<link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Fredoka+One" rel="stylesheet">
 
+<style>
+    body {
+        background-color: transparent;
+        font-family: 'Arial', sans-serif;
+    }
+    .container-fluid {
+        padding: 10px 0;
+    }
+    .container {
+        background: linear-gradient(to right, #fff, transparent);
+        padding: 25px;
+        border-radius: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: auto;
+        margin: auto;
+        margin-top: 20px;
+        text-align: center;
+    }
+    #title {
+        font-family: 'Fredoka One', cursive;
+        color: #333;
+        text-align: center;
+        font-size: 2rem; /* Adaptive font size for better responsiveness */
+        margin-bottom: 30px;
+    }
+    .text-uppercase {
+        font-family: 'Righteous', cursive;
+        text-transform: uppercase;
+        color: #333;
+        font-size: 1.5rem;
+    }
+    .style1 {
+        color: #333;
+        font-weight: bold;
+        font-size: 2.5rem; /* Adjusted title size */
+        margin-bottom: 20px;
+        margin-top: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+    }
+    .style2 {
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      font-weight: bold;
+      font-size: 2rem; /* Adjusted title size */
+      margin-bottom: 20px;
+    }
 
+    .alert {
+        max-width: 100%; /* Restrict width to a percentage of the parent container */
+        margin: auto; /* Center the alert box */
+        padding: 15px; /* Adjust padding for better fit */
+        border-radius: 1rem; /* Smooth rounded corners */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Add a subtle shadow for depth */
+        text-align: center; /* Center-align the text */
+    }
+    .form-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        margin-top: 2px;
+        text-align: left;
+    }
 
-		<style>
-			body {background-color:#000000;}
-			.container-fluid {padding:50px;}
-			.container{background-color:white;padding:50px;   }
-			#title{font-family: 'Fredoka One', cursive;
-}
-			.text-uppercase{
-			font-family: 'Righteous', cursive;
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+        width: 30%; /* Adjust label width */
+    }
 
-			}
-		.style1 {
-	color: #000000;
-	font-weight: bold;
-}
-.style4 {color: #FFFFFF; font-weight: bold; }
-        .style6 {color: #FF0000; font-weight: bold; font-style: italic; }
-        </style>
+    .form-group input, .form-group textarea {
+        width: 65%; /* Adjust input width */
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background-color: transparent;
+        font-size: 1rem;
+        pointer-events: none; /* Disable editing */
+    }
 
-	<body>
-	<div class="container-fluid">
-		<div class="container">
+    .profile-row {
+        display: flex;
+        flex-direction: column; /* Change to column layout for single column */
+        align-items: center; /* Center items */
+        margin-top: 20px;
+    }
 
-			<div class="row">
-				<div class="col-md-5">
- 					<form role="form" method="POST" >
-						{% csrf_token %}
-						<fieldset>
-							<p class="text-uppercase pull-center style1">YOUR PROFILE DETAILS !!! </p>
-                            <hr>
-						<div class="form-group">
-                            <P>&nbsp;</P>
-                            </div>
+    .profile-column {
+        flex: 1;
+        width: 100%; /* Full width for single column */
+        background-color: transparent;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+    }
 
-							<div class="form-group">
-							  <table width="879" border="0" align="center">
-                                <tr>
-                                    <td width="148" height="34" bgcolor="#FF0000"><span class="style4">Username</span></td>
-                                  <td width="225"><span class="style6">{{object.username}}</span></td>
-                                    <td width="157" bgcolor="#FF0000"><span class="style4">Email Id </span></td>
-                                    <td width="321"><span class="style6">{{object.email}}</span></td>
-                                  </tr>
-                                  <tr>
-                                    <td height="38" bgcolor="#FF0000"><span class="style4">Mobile Number </span></td>
-                                    <td><span class="style6">{{object.phoneno}}</span></td>
-                                    <td bgcolor="#FF0000"><span class="style4">Gender</span></td>
-                                    <td><span class="style6">{{object.gender}}</span></td>
-                                  </tr>
+    .style4 {
+        color: #fff;
+        font-weight: bold;
+        font-size: 1rem;
+        padding: 10px;
+        background-color: #3b5998;
+        border-radius: 5px;
+    }
+    .style6 {
+        color: #333;
+        font-weight: bold;
+        font-size: 1rem;
+        padding: 8px;
+    }
 
-                                  <tr>
-                                    <td height="34" bgcolor="#FF0000"><span class="style4">Address</span></td>
-                                    <td><span class="style6">{{object.address}}</span></td>
-                                    <td bgcolor="#FF0000"><span class="style4">Country</span></td>
-                                    <td><span class="style6">{{object.country}}</span></td>
-                                  </tr>
-                                  <tr>
-                                    <td height="32" bgcolor="#FF0000"><span class="style4">State</span></td>
-                                    <td><span class="style6">{{object.state}}</span></td>
-                                    <td bgcolor="#FF0000"><span class="style4">City</span></td>
-                                    <td><span class="style6">{{object.city}}</span></td>
-                                  </tr>
-                                  <tr>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                  </tr>
-                                </table>
-                                <p>&nbsp;</p>
-                                <p>&nbsp;</p>
-						</div>
+    .form-group input, .form-group textarea {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 8px;
+        background: linear-gradient(to right, #fff, transparent);
+    }
+    .form-group input:focus, .form-group textarea:focus {
+        border-color: #3b5998;
+        box-shadow: 0 0 5px rgba(59, 89, 152, 0.5); /* Highlight on focus */
+    }
 
+    /* Reduce padding between form group boxes */
+    .form-group {
+        padding-bottom: 10px;
+    }
 
+    /* Responsive design for smaller screens */
+    @media (max-width: 768px) {
+        .form-group label {
+            width: 100%; /* Make label full width on smaller screens */
+        }
+        .form-group input, .form-group textarea {
+            width: 100%; /* Make input full width on smaller screens */
+        }
+    }
+</style>
 
+<body>
+    <div class="container-fluid">
+        <div class="container">
+            <fieldset>
+                <p class="style2">Personal Details</p>
+                <hr>
+                
+                <div class="profile-row">
+                    <div class="profile-column">
+                        <div class="form-group">
+                            <label class="style4">Username</label>
+                            <input type="text" value="{{object.username}}" readonly>
+                        </div>
 
-						</fieldset>
-					</form>
-				</div>
+                        <div class="form-group">
+                            <label class="style4">Email Id</label>
+                            <input type="email" value="{{object.email}}" readonly>
+                        </div>
 
-				<div class="col-md-2">
-					<!-------null------>
-				</div>
-            </div>
+                        <div class="form-group">
+                            <label class="style4">Mobile Number</label>
+                            <input type="tel" value="{{object.phoneno}}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="style4">Gender</label>
+                            <input type="text" value="{{object.gender}}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="style4">Address</label>
+                            <textarea rows="1" readonly>{{object.address}}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="style4">Country</label>
+                            <input type="text" value="{{object.country}}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="style4">State</label>
+                            <input type="text" value="{{object.state}}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="style4">City</label>
+                            <input type="text" value="{{object.city}}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
         </div>
     </div>
+</body>
+
 {% endblock %}

@@ -72,7 +72,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'social_media_popularity_prediction',
         'USER':'root',
-        'PASSWORD': 'mysql123',
+        'PASSWORD': '9090',
         'HOST' :'127.0.0.1',
         'PORT' :'3306',
     }
